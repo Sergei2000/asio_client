@@ -36,31 +36,41 @@ void send_string(socket_ptr& sock,std::string& msg)
 void sync_echo(std::string& msg,int port_num)
 {
     socket_ptr sock(new ip::tcp::socket(service));
-    ip::tcp::endpoint ep( ip::address::from_string("enter address"), std::move(port_num));
+    ip::tcp::endpoint ep( ip::address::from_string("192.168.1.2"), std::move(port_num));
     sock->connect(ep);
+    char buff[200];
+    int counter=0;
+   // if (sock->available())
+      while (true)
+    {
 
+        counter=sock->read_some(boost::asio::buffer(buff,200));
+        sock->write_some(boost::asio::buffer(msg));
+        std::cout<<"accessable"<<boost::this_thread::get_id()<<" "+msg+std::string(buff)<<std::endl;
+        boost::this_thread::sleep(boost::posix_time::millisec(4));
+    }
 
-     for (int i=0;i<5;++i)
-     {
-         std::cout<<receive_message(sock)<<std::endl;
-         send_string(sock,msg);
-         std::cout<<receive_message(sock)<<std::endl;
-     }
+   //
 
+    std::cout<<buff;
     sock->close();
+
 
 }
 int main(int argc, char* argv[])
 {
     std::string msg="ebana rot\n";
     std::string msg2="nihuya sebe\n";
-
+    std::string msg3="we fucking done it\n";
     boost::thread first(sync_echo,msg,8001);
     boost::thread second(sync_echo,msg2,8001);
+    boost::thread third(sync_echo,msg3,8001);
 
 
     first.join();
     second.join();
+    third.join();
     return 0;
 
 }
+
