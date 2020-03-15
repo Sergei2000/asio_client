@@ -40,37 +40,48 @@ void sync_echo(std::string& msg,int port_num)
     sock->connect(ep);
     char buff[200];
     int counter=0;
-   // if (sock->available())
+    std::string data="client list\n",data1="ping\n";
+    bool check=true;
+    int c=msg.size();
+    sock->write_some(boost::asio::buffer(&c,4));
+    sock->write_some(boost::asio::buffer(msg,c));
       while (true)
     {
+          if (check)
+          {
+              int a=data1.size();
+              sock->write_some(boost::asio::buffer(&a,4));
+              sock->write_some(boost::asio::buffer(data1,a));
 
-        counter=sock->read_some(boost::asio::buffer(buff,200));
-        sock->write_some(boost::asio::buffer(msg));
-        std::cout<<"accessable"<<boost::this_thread::get_id()<<" "+msg+std::string(buff)<<std::endl;
+          }
+
+          else
+          {
+              int a=data.size();
+              sock->write_some(boost::asio::buffer(&a,4));
+              sock->write_some(boost::asio::buffer(data,a));
+
+          }
+          int b;
+          sock->read_some(boost::asio::buffer(&b,4));
+        sock->read_some(boost::asio::buffer(buff,b));
+        std::cout<<" "+std::string(buff)<<std::endl;
         boost::this_thread::sleep(boost::posix_time::millisec(4));
+        check=(!check);
     }
 
-   //
 
-    std::cout<<buff;
-    sock->close();
 
 
 }
 int main(int argc, char* argv[])
 {
-    std::string msg="ebana rot\n";
-    std::string msg2="nihuya sebe\n";
-    std::string msg3="we fucking done it\n";
+    std::string msg="hello\n";
+    std::string msg2="hi\n";
     boost::thread first(sync_echo,msg,8001);
     boost::thread second(sync_echo,msg2,8001);
-    boost::thread third(sync_echo,msg3,8001);
-
-
     first.join();
     second.join();
-    third.join();
     return 0;
-
 }
 
