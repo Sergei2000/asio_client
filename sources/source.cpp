@@ -5,19 +5,15 @@
 #include <boost/asio.hpp>
 #include <boost/thread/thread.hpp>
 
-using namespace boost::asio;
 static const int buf_size = 500;
-typedef boost::shared_ptr <ip::tcp::socket> socket_ptr;
+typedef boost::shared_ptr <boost::asio::ip::tcp::socket> socket_ptr;
 
 void clear_buf(char *buf, int size) {
     for (int i = 0; i < size; ++i) {
         buf[i] = '/0';
     }
 }
-
-io_service service;
-
-
+boost::asio::ip::tcp::io_service service;
 std::string receive_message(socket_ptr &sock) {
     char buf[buf_size];
     clear_buf(buf, buf_size);
@@ -34,8 +30,8 @@ void send_string(socket_ptr &sock, std::string &msg) {
 }
 
 void sync_echo(std::string &msg, int port_num) {
-    socket_ptr sock(new ip::tcp::socket(service));
-    ip::tcp::endpoint ep(ip::address::from_string("192.168.1.2"), std::move(port_num));
+    socket_ptr sock(new boost::asio::ip::tcp::socket(service));
+    boost::asio::ip::tcp::endpoint ep(ip::address::from_string("192.168.1.2"), std::move(port_num));
     sock->connect(ep);
     char buff[200];
     int counter = 0;
@@ -49,12 +45,10 @@ void sync_echo(std::string &msg, int port_num) {
             int a = data1.size();
             sock->write_some(boost::asio::buffer(&a, 4));
             sock->write_some(boost::asio::buffer(data1, a));
-
         } else {
             int a = data.size();
             sock->write_some(boost::asio::buffer(&a, 4));
             sock->write_some(boost::asio::buffer(data, a));
-
         }
         int b;
         sock->read_some(boost::asio::buffer(&b, 4));
@@ -63,8 +57,6 @@ void sync_echo(std::string &msg, int port_num) {
         boost::this_thread::sleep(boost::posix_time::millisec(4));
         check = (!check);
     }
-
-
 }
 
 int main(int argc, char *argv[]) {
