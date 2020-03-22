@@ -36,7 +36,6 @@ void sync_echo(std::string &msg, int port_num) {
     std::move(port_num));
     sock->connect(ep);
     char buff[200];
-    int counter = 0;
     std::string data = "client list\n", data1 = "ping\n";
     bool check = true;
     int c = msg.size();
